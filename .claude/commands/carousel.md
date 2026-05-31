@@ -200,13 +200,22 @@ For slides that benefit from a visual (cover, proof, bridge), populate `image_pr
 - Subtle film grain, soft gradients, 9:16 format
 - Adapt scene to slide content — cover gets the full lotus/aura scene, proof gets an orb or radiant geometry, bridge gets a warm atmospheric landscape
 
-#### Image generation — provider fallback
+#### Image generation — provider selection
 
-After outputting the JSON spec, generate each image automatically using this logic — never stop and ask, just execute:
+Before generating any images, ask the user exactly this question (do not skip it):
 
-1. Check Higgsfield credits via the `balance` MCP tool
-2. **If credits > 0** → use `mcp__generate_image` with `model: nano_banana_pro`, `aspect_ratio: 9:16`, `resolution: 2k`
-3. **If credits = 0** → run `python3 scripts/generate_image.py --prompt "<image_prompt>" --output images/slide_<N>.png --force gemini` for each slide that has an `image_prompt`
+> **Which image provider would you like to use?**
+> 1. **Higgsfield** — best quality, requires credits
+> 2. **Gemini** — high quality, requires funded billing account
+> 3. **Pollinations** — free, no API key needed
+> 4. **Auto** — tries Higgsfield → Gemini → Pollinations automatically
+
+Wait for the user's answer, then generate each image that has an `image_prompt` using the chosen provider:
+
+- **Higgsfield selected**: Check credits first via `mcp__balance`. If credits > 0, use `mcp__generate_image` with `model: nano_banana_pro`, `aspect_ratio: 9:16`, `resolution: 2k`. If no credits, inform the user and fall back to Pollinations.
+- **Gemini selected**: run `python3 scripts/generate_image.py --prompt "<image_prompt>" --output images/slide_<N>.png --provider gemini`
+- **Pollinations selected**: run `python3 scripts/generate_image.py --prompt "<image_prompt>" --output images/slide_<N>.png --provider pollinations`
+- **Auto selected**: run `python3 scripts/generate_image.py --prompt "<image_prompt>" --output images/slide_<N>.png --provider auto`
 
 Create the `images/` directory if it does not exist. Report the provider used and the output path or URL for each image.
 

@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-Image generation with automatic fallback: Higgsfield → Gemini.
-Usage: python3 scripts/generate_image.py --prompt "..." --output slide_1.png
+Image generation with multi-provider support.
+Providers: higgsfield (via MCP), gemini, pollinations (free, no key needed)
+
+Usage:
+  python3 scripts/generate_image.py --prompt "..." --output slide_1.png
+  python3 scripts/generate_image.py --prompt "..." --output slide_1.png --provider pollinations
+  python3 scripts/generate_image.py --prompt "..." --output slide_1.png --provider gemini
+  python3 scripts/generate_image.py --prompt "..." --output slide_1.png --provider auto
 """
 
 import argparse
@@ -9,61 +15,62 @@ import base64
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.error
+import urllib.parse
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 HIGGSFIELD_BASE = "https://api.higgsfield.ai"
 
 
-def check_higgsfield_credits():
-    """Returns credit count or 0 on any error."""
+# ─── Pollinations ────────────────────────────────────────────────────────────
+
+def generate_with_pollinations(prompt: str, output_path: str) -> bool:
+    """Free, no key required. Uses FLUX model at 9:16 ratio."""
+    encoded = urllib.parse.quote(prompt)
+    url = (
+        f"https://image.pollinations.ai/prompt/{encoded}"
+        f"?width=768&height=1344&model=flux&nologo=true&seed={int(time.time())}"
+    )
     try:
-        req = urllib.request.Request(
-            f"{HIGGSFIELD_BASE}/v1/user/balance",
-            headers={"Authorization": f"Bearer {os.environ.get('HIGGSFIELD_API_KEY', '')}"},
-        )
-        with urllib.request.urlopen(req, timeout=8) as r:
-            data = json.loads(r.read())
-            return data.get("credits", 0)
-    except Exception:
-        return 0
-
-
-def generate_with_gemini(prompt: str, output_path: str) -> bool:
-    """Generate image via Gemini Imagen API. Returns True on success."""
-    if not GEMINI_API_KEY:
-        print("[gemini] No API key found in GEMINI_API_KEY env var.", file=sys.stderr)
+        req = urllib.request.Request(url, headers={"User-Agent": "carousel-skill/1.0"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            data = r.read()
+        if len(data) < 1000:
+            print("[pollinations] Response too small — likely an error.", file=sys.stderr)
+            return False
+        with open(output_path, "wb") as f:
+            f.write(data)
+        print(f"[pollinations] Saved to {output_path}")
+        return True
+    except Exception as e:
+        print(f"[pollinations] Error: {e}", file=sys.stderr)
         return False
 
-    # Try image-capable Gemini models in priority order
-    for model, endpoint, build_payload in [
-        (
-            "gemini-3-pro-image",
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent?key={GEMINI_API_KEY}",
-            lambda p: json.dumps({
-                "contents": [{"parts": [{"text": p}]}],
-                "generationConfig": {"responseModalities": ["IMAGE"]},
-            }).encode(),
-        ),
-        (
-            "gemini-3.1-flash-image",
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key={GEMINI_API_KEY}",
-            lambda p: json.dumps({
-                "contents": [{"parts": [{"text": p}]}],
-                "generationConfig": {"responseModalities": ["IMAGE"]},
-            }).encode(),
-        ),
-        (
-            "gemini-2.5-flash-image",
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={GEMINI_API_KEY}",
-            lambda p: json.dumps({
-                "contents": [{"parts": [{"text": p}]}],
-                "generationConfig": {"responseModalities": ["IMAGE"]},
-            }).encode(),
-        ),
-    ]:
-        payload = build_payload(prompt)
+
+# ─── Gemini ──────────────────────────────────────────────────────────────────
+
+def generate_with_gemini(prompt: str, output_path: str) -> bool:
+    """Requires GEMINI_API_KEY with billing active."""
+    if not GEMINI_API_KEY:
+        print("[gemini] No API key in GEMINI_API_KEY env var.", file=sys.stderr)
+        return False
+
+    models = [
+        "gemini-3-pro-image",
+        "gemini-3.1-flash-image",
+        "gemini-2.5-flash-image",
+    ]
+    for model in models:
+        endpoint = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{model}:generateContent?key={GEMINI_API_KEY}"
+        )
+        payload = json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"responseModalities": ["IMAGE"]},
+        }).encode()
         try:
             req = urllib.request.Request(
                 endpoint,
@@ -74,7 +81,6 @@ def generate_with_gemini(prompt: str, output_path: str) -> bool:
             with urllib.request.urlopen(req, timeout=90) as r:
                 result = json.loads(r.read())
 
-            # Gemini Flash response format
             if "candidates" in result:
                 for part in result["candidates"][0]["content"]["parts"]:
                     if "inlineData" in part:
@@ -84,7 +90,6 @@ def generate_with_gemini(prompt: str, output_path: str) -> bool:
                         print(f"[gemini:{model}] Saved to {output_path}")
                         return True
 
-            # Imagen response format
             if "predictions" in result:
                 img_b64 = result["predictions"][0].get("bytesBase64Encoded", "")
                 if img_b64:
@@ -105,17 +110,26 @@ def generate_with_gemini(prompt: str, output_path: str) -> bool:
     return False
 
 
+# ─── Higgsfield ──────────────────────────────────────────────────────────────
+
+def check_higgsfield_credits() -> int:
+    try:
+        req = urllib.request.Request(
+            f"{HIGGSFIELD_BASE}/v1/user/balance",
+            headers={"Authorization": f"Bearer {os.environ.get('HIGGSFIELD_API_KEY', '')}"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as r:
+            return json.loads(r.read()).get("credits", 0)
+    except Exception:
+        return 0
+
+
 def generate_with_higgsfield(prompt: str, output_path: str) -> bool:
-    """
-    Higgsfield generation is handled via the MCP connector in Claude sessions.
-    This function signals that Higgsfield should be used by printing a JSON
-    directive that the carousel skill reads.
-    """
+    """Signals the carousel skill to use the Higgsfield MCP connector."""
     credits = check_higgsfield_credits()
     if credits <= 0:
-        print(f"[higgsfield] No credits available ({credits}).", file=sys.stderr)
+        print(f"[higgsfield] No credits ({credits}).", file=sys.stderr)
         return False
-
     print(json.dumps({
         "provider": "higgsfield",
         "prompt": prompt,
@@ -125,27 +139,46 @@ def generate_with_higgsfield(prompt: str, output_path: str) -> bool:
     return True
 
 
+# ─── Main ─────────────────────────────────────────────────────────────────────
+
+PROVIDERS = {
+    "pollinations": generate_with_pollinations,
+    "gemini": generate_with_gemini,
+    "higgsfield": generate_with_higgsfield,
+}
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Generate image with provider fallback.")
-    parser.add_argument("--prompt", required=True, help="Image generation prompt")
-    parser.add_argument("--output", required=True, help="Output file path (.png)")
-    parser.add_argument("--force", choices=["higgsfield", "gemini"], help="Force a specific provider")
+    parser = argparse.ArgumentParser(description="Generate image — multi-provider.")
+    parser.add_argument("--prompt", required=True)
+    parser.add_argument("--output", required=True)
+    parser.add_argument(
+        "--provider",
+        choices=["higgsfield", "gemini", "pollinations", "auto"],
+        default="auto",
+        help="Provider to use. 'auto' tries Higgsfield → Gemini → Pollinations.",
+    )
     args = parser.parse_args()
 
-    if args.force == "gemini":
-        success = generate_with_gemini(args.prompt, args.output)
-    elif args.force == "higgsfield":
-        success = generate_with_higgsfield(args.prompt, args.output)
+    os.makedirs(os.path.dirname(args.output) if os.path.dirname(args.output) else ".", exist_ok=True)
+
+    if args.provider != "auto":
+        success = PROVIDERS[args.provider](args.prompt, args.output)
     else:
-        # Auto: try Higgsfield first, fall back to Gemini
-        print("[auto] Checking Higgsfield credits...")
+        # Auto fallback chain
         credits = check_higgsfield_credits()
         if credits > 0:
-            print(f"[auto] Higgsfield has {credits} credits — using Higgsfield via MCP.")
+            print(f"[auto] Higgsfield has {credits} credits.")
             success = generate_with_higgsfield(args.prompt, args.output)
-        else:
-            print(f"[auto] Higgsfield out of credits — falling back to Gemini.")
+        elif GEMINI_API_KEY:
+            print("[auto] Higgsfield empty — trying Gemini.")
             success = generate_with_gemini(args.prompt, args.output)
+            if not success:
+                print("[auto] Gemini failed — falling back to Pollinations (free).")
+                success = generate_with_pollinations(args.prompt, args.output)
+        else:
+            print("[auto] No paid provider available — using Pollinations (free).")
+            success = generate_with_pollinations(args.prompt, args.output)
 
     sys.exit(0 if success else 1)
 
