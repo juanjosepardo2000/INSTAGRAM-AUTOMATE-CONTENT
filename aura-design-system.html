@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura · Sistema de Diseño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Espectro Aura */
+    --aura-sky:#8fcddf; --aura-mint:#a6ddd5; --aura-sage:#bcc4a4; --aura-gold:#f3d49a;
+    --aura-peach:#fbc38c; --aura-coral:#f59f93; --aura-rose:#e7b2ac; --aura-orchid:#c88cb6;
+    --aura-lavender:#beafc2; --aura-iris:#9d7cc4; --aura-indigo:#7477c3; --aura-steel:#6797bc;
+    /* Base + semántica */
+    --mist:#faf6f1; --dawn:#fed0bf; --dusk-coral:#fb9095;
+    --ink:#2f2c49; --ink-soft:#6f6a89; --ink-faint:#a8a4bd;
+    --glow-mint:#c8f0d8; --glow-warm:#fff4e2; --line:rgba(47,44,73,.12);
+    --surface-veil:rgba(255,252,248,.55); --surface-veil-strong:rgba(255,252,248,.82);
+    --surface-blur:blur(20px);
+    /* Gradientes firma */
+    --grad-aura:linear-gradient(180deg,#8fcddf 0%,#a6ddd5 16%,#f3d49a 36%,#c6d1c3 52%,#fcca8b 70%,#fdb881 86%,#b1cda5 100%);
+    --grad-dawn:radial-gradient(120% 90% at 50% 35%,#ffd9c6 0%,#fed0bf 45%,#fb9095 100%);
+    --grad-figure:linear-gradient(180deg,#9d7cc4 0%,#7477c3 55%,#6797bc 100%);
+    --grad-orb:radial-gradient(circle at 50% 50%,#eafff1 0%,#c8f0d8 50%,rgba(200,240,216,0) 75%);
+    /* Tipografía */
+    --font-display:'Fraunces',Georgia,serif; --font-body:'Hanken Grotesk',system-ui,sans-serif;
+    /* Espaciado */
+    --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;
+    --space-6:32px;--space-7:48px;--space-8:64px;--space-9:96px;--space-10:128px;
+    /* Radios */
+    --radius-sm:14px;--radius-md:22px;--radius-lg:34px;--radius-xl:48px;--radius-pill:999px;
+    /* Resplandor */
+    --glow-1:0 4px 24px rgba(116,119,195,.12);
+    --glow-2:0 12px 48px -8px rgba(247,159,147,.28);
+    --glow-3:0 24px 64px -16px rgba(47,44,73,.20);
+    --glow-orb:0 0 64px 8px rgba(200,240,216,.65);
+    --glow-focus:0 0 0 4px rgba(157,124,196,.35);
+    /* Movimiento */
+    --ease-breath:cubic-bezier(.37,0,.63,1);
+    --ease-out-soft:cubic-bezier(.22,1,.36,1);
+    --dur-quick:280ms;--dur-base:520ms;--dur-slow:900ms;--breath-cycle:7s;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font-body); color:var(--ink); background:var(--mist);
+    line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+
+  /* GRANO global */
+  body::after{
+    content:""; position:fixed; inset:0; z-index:9999; pointer-events:none;
+    opacity:.06; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 var(--space-5)}
+  .eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-soft);font-weight:600}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; min-height:96vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; overflow:hidden;
+    background:var(--grad-aura);
+  }
+  .hero::before{ /* halo cálido central */
+    content:""; position:absolute; left:50%; top:54%; transform:translate(-50%,-50%);
+    width:520px;height:680px; border-radius:50%;
+    background:radial-gradient(ellipse at center,var(--glow-warm) 0%,rgba(255,244,226,0) 62%);
+    filter:blur(8px); opacity:.85;
+  }
+  .figure{
+    position:relative; z-index:2; width:170px; height:280px; margin-bottom:var(--space-6);
+    animation:breathe var(--breath-cycle) var(--ease-breath) infinite;
+  }
+  .figure .body{
+    position:absolute; left:50%; bottom:34px; transform:translateX(-50%);
+    width:150px; height:170px; border-radius:75px 75px 60px 60px;
+    background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.95),rgba(255,255,255,.55));
+    filter:blur(2px);
+  }
+  .figure .head{
+    position:absolute; left:50%; top:20px; transform:translateX(-50%);
+    width:62px;height:72px;border-radius:50%;
+    background:radial-gradient(circle at 50% 40%,#fff,rgba(255,255,255,.7));
+    filter:blur(1px);
+  }
+  .figure .base{
+    position:absolute; left:50%; bottom:6px; transform:translateX(-50%);
+    width:230px; height:60px; border-radius:50%;
+    background:radial-gradient(ellipse at center,rgba(255,255,255,.85),rgba(255,255,255,0) 70%);
+    filter:blur(3px);
+  }
+  .figure .beam{
+    position:absolute; left:50%; top:-220px; transform:translateX(-50%);
+    width:46px;height:280px;border-radius:50%;
+    background:linear-gradient(180deg,rgba(143,205,223,0),rgba(255,255,255,.7));
+    filter:blur(10px);
+  }
+  .hero h1{
+    position:relative;z-index:2;font-family:var(--font-display);font-weight:300;
+    font-size:clamp(3rem,9vw,5.5rem);line-height:1;letter-spacing:-.03em;color:var(--ink);
+    animation:rise 1.2s var(--ease-out-soft) both .2s;
+  }
+  .hero h1 em{font-style:italic;font-weight:400}
+  .hero p{
+    position:relative;z-index:2;max-width:30ch;margin-top:var(--space-5);
+    font-size:1.15rem;color:var(--ink-soft);
+    animation:rise 1.2s var(--ease-out-soft) both .4s;
+  }
+  .hero .eyebrow{position:relative;z-index:2;margin-bottom:var(--space-4);animation:rise 1.2s var(--ease-out-soft) both}
+  .scroll-hint{position:absolute;bottom:32px;z-index:2;font-size:.75rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-soft);animation:bob 2.4s var(--ease-breath) infinite}
+
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.055)}}
+  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  @keyframes bob{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(8px);opacity:1}}
+
+  /* ---------- SECCIONES ---------- */
+  section{padding:var(--space-10) 0}
+  .sec-head{margin-bottom:var(--space-7);max-width:54ch}
+  .sec-head h2{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,5vw,3rem);
+    letter-spacing:-.02em;line-height:1.1;margin-top:var(--space-3)}
+  .sec-head p{color:var(--ink-soft);margin-top:var(--space-4);font-size:1.05rem}
+
+  /* Color */
+  .spectrum{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--space-3)}
+  .sw{border-radius:var(--radius-md);padding:var(--space-4);height:128px;display:flex;
+    flex-direction:column;justify-content:flex-end;box-shadow:var(--glow-1);position:relative;overflow:hidden}
+  .sw .name{font-weight:600;font-size:.9rem}
+  .sw .hex{font-size:.78rem;opacity:.75;font-variant-numeric:tabular-nums}
+  .sw.dark{color:#fff} .sw.dark .hex{opacity:.85}
+
+  .semantic{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--space-3);margin-top:var(--space-5)}
+  .chip{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);
+    border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-veil)}
+  .chip .dot{width:38px;height:38px;border-radius:50%;flex-shrink:0;box-shadow:var(--glow-1)}
+  .chip .meta{font-size:.82rem;line-height:1.3}
+  .chip .meta b{display:block;font-size:.9rem}
+  .chip .meta span{color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+  /* Gradientes */
+  .grads{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-4)}
+  .grad-card{height:220px;border-radius:var(--radius-lg);position:relative;overflow:hidden;
+    box-shadow:var(--glow-2);display:flex;align-items:flex-end;padding:var(--space-4)}
+  .grad-card span{background:var(--surface-veil-strong);backdrop-filter:var(--surface-blur);
+    padding:6px 14px;border-radius:var(--radius-pill);font-size:.82rem;font-weight:600}
+
+  /* Tipografía */
+  .type-row{display:flex;align-items:baseline;gap:var(--space-5);padding:var(--space-4) 0;
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .type-row .tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-faint);
+    width:120px;flex-shrink:0;font-weight:600}
+  .specimen-display{font-family:var(--font-display);font-weight:300;line-height:1}
+  .specimen-body{font-family:var(--font-body)}
+
+  /* Espaciado + radios */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-7)}
+  .scale-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-3)}
+  .scale-row .label{width:74px;font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .scale-bar{height:18px;border-radius:6px;background:var(--grad-figure);opacity:.85}
+  .radius-row{display:flex;gap:var(--space-4);align-items:flex-end;flex-wrap:wrap}
+  .radius-box{width:84px;height:84px;background:var(--grad-dawn);box-shadow:var(--glow-1);
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-size:.72rem;color:var(--ink);font-weight:600}
+
+  /* Resplandor */
+  .glows{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-6);
+    padding:var(--space-7) var(--space-5);background:var(--mist);border-radius:var(--radius-lg)}
+  .glow-tile{aspect-ratio:1;background:var(--surface-veil-strong);border-radius:var(--radius-md);
+    display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:var(--ink-soft)}
+  .g1{box-shadow:var(--glow-1)} .g2{box-shadow:var(--glow-2)} .g3{box-shadow:var(--glow-3)}
+  .g4{box-shadow:var(--glow-orb);background:var(--grad-orb)}
+
+  /* Componentes */
+  .components{background:var(--grad-dawn);border-radius:var(--radius-xl);padding:var(--space-8) var(--space-6);
+    position:relative;overflow:hidden}
+  .components .panel{background:var(--surface-veil-strong);backdrop-filter:var(--surface-blur);
+    border:1px solid rgba(255,255,255,.6);border-radius:var(--radius-lg);padding:var(--space-7);
+    box-shadow:var(--glow-3)}
+  .comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-6);align-items:start}
+  .comp-block h4{font-family:var(--font-display);font-weight:500;font-size:1.1rem;margin-bottom:var(--space-4)}
+  .row{display:flex;gap:var(--space-3);flex-wrap:wrap;align-items:center}
+
+  .btn{font-family:var(--font-body);font-weight:600;font-size:.95rem;border:none;cursor:pointer;
+    padding:13px 26px;border-radius:var(--radius-pill);transition:transform var(--dur-base) var(--ease-out-soft),box-shadow var(--dur-base) var(--ease-out-soft)}
+  .btn-primary{background:var(--grad-figure);color:#fff;box-shadow:var(--glow-1)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 36px -6px rgba(116,119,195,.5)}
+  .btn-ink{background:var(--ink);color:var(--mist)}
+  .btn-ink:hover{transform:translateY(-2px);box-shadow:var(--glow-3)}
+  .btn-ghost{background:var(--surface-veil);backdrop-filter:var(--surface-blur);
+    border:1px solid var(--line);color:var(--ink)}
+  .btn-ghost:hover{transform:translateY(-2px);box-shadow:var(--glow-1)}
+
+  .badge{display:inline-block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+    padding:5px 13px;border-radius:var(--radius-pill);color:var(--ink)}
+  .b-mint{background:var(--glow-mint)} .b-rose{background:var(--aura-rose)}
+  .b-lav{background:var(--aura-lavender)} .b-gold{background:var(--aura-gold)}
+
+  .field{width:100%;font-family:var(--font-body);font-size:.95rem;color:var(--ink);
+    padding:13px 18px;border-radius:var(--radius-md);border:1px solid var(--line);
+    background:var(--surface-veil);outline:none;transition:box-shadow var(--dur-quick) ease}
+  .field::placeholder{color:var(--ink-faint)}
+  .field:focus{box-shadow:var(--glow-focus);border-color:transparent}
+
+  .mini-card{background:var(--surface-veil);border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:var(--space-5);box-shadow:var(--glow-1)}
+  .mini-card .badge{margin-bottom:var(--space-3)}
+  .mini-card h5{font-family:var(--font-display);font-weight:500;font-size:1.15rem;margin-bottom:6px}
+  .mini-card p{font-size:.88rem;color:var(--ink-soft)}
+
+  /* Orbe respiración */
+  .orb-stage{display:flex;flex-direction:column;align-items:center;gap:var(--space-4)}
+  .orb{width:120px;height:120px;border-radius:50%;background:var(--grad-orb);box-shadow:var(--glow-orb);
+    animation:breathe calc(var(--breath-cycle) * .85) var(--ease-breath) infinite}
+  .orb-label{font-size:.78rem;color:var(--ink-soft);letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+
+  /* Motion demo */
+  .motion-demo{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-5)}
+  .ease-card{flex:1;min-width:200px;background:var(--surface-veil);border:1px solid var(--line);
+    border-radius:var(--radius-md);padding:var(--space-5);overflow:hidden}
+  .ease-card .track{height:8px;border-radius:4px;background:var(--line);position:relative;margin-top:var(--space-4)}
+  .ease-card .dot{position:absolute;top:-6px;width:20px;height:20px;border-radius:50%;background:var(--grad-figure);box-shadow:var(--glow-1)}
+  .d-breath{animation:slide var(--breath-cycle) var(--ease-breath) infinite alternate}
+  .d-soft{animation:slide 2.4s var(--ease-out-soft) infinite alternate}
+  @keyframes slide{from{left:0}to{left:calc(100% - 20px)}}
+  .ease-card code{font-size:.72rem;color:var(--ink-soft)}
+
+  footer{text-align:center;padding:var(--space-9) var(--space-5) var(--space-8);color:var(--ink-soft);font-size:.85rem}
+  footer .orb{width:54px;height:54px;margin:0 auto var(--space-4)}
+
+  @media(max-width:680px){.duo{grid-template-columns:1fr}.type-row .tag{width:100%}}
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="figure">
+      <div class="beam"></div>
+      <div class="head"></div>
+      <div class="body"></div>
+      <div class="base"></div>
+    </div>
+    <p class="eyebrow">Sistema de Diseño</p>
+    <h1>Aura</h1>
+    <p>Un lenguaje visual para la respiración, la meditación y la calma. Luz en lugar de sombra, gradiente en lugar de borde.</p>
+    <div class="scroll-hint">desplázate · inhala</div>
+  </header>
+
+  <!-- COLOR -->
+  <section class="wrap" id="color">
+    <div class="sec-head">
+      <p class="eyebrow">01 · Color</p>
+      <h2>El espectro Aura</h2>
+      <p>Una banda pastel de espectro completo, desaturada y serena, extraída del aura del loto. Es la firma de la marca: el arcoíris entero, en susurro.</p>
+    </div>
+    <div class="spectrum" id="spectrum"></div>
+
+    <div style="margin-top:var(--space-8)">
+      <p class="eyebrow">Base y semántica</p>
+      <div class="semantic" id="semantic"></div>
+    </div>
+  </section>
+
+  <!-- GRADIENTES -->
+  <section class="wrap" id="gradients">
+    <div class="sec-head">
+      <p class="eyebrow">02 · Gradientes</p>
+      <h2>Atmósfera, no superficie</h2>
+      <p>Ningún fondo es plano. Cuatro mezclas firmadas dan profundidad y movimiento sin un solo borde duro.</p>
+    </div>
+    <div class="grads">
+      <div class="grad-card" style="background:var(--grad-aura)"><span>--grad-aura</span></div>
+      <div class="grad-card" style="background:var(--grad-dawn)"><span>--grad-dawn</span></div>
+      <div class="grad-card" style="background:var(--grad-figure)"><span>--grad-figure</span></div>
+      <div class="grad-card" style="background:var(--mist)"><div class="orb" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:120px;height:120px;animation:none"></div><span>--grad-orb</span></div>
+    </div>
+  </section>
+
+  <!-- TIPOGRAFÍA -->
+  <section class="wrap" id="type">
+    <div class="sec-head">
+      <p class="eyebrow">03 · Tipografía</p>
+      <h2>Fraunces &amp; Hanken Grotesk</h2>
+      <p>Una serif óptica de carácter orgánico para los titulares, ligera y etérea; una sans humanista y calmada para el cuerpo.</p>
+    </div>
+    <div class="type-row"><span class="tag">Display XL · 72</span><span class="specimen-display" style="font-size:4.5rem">Respira</span></div>
+    <div class="type-row"><span class="tag">Display · 48</span><span class="specimen-display" style="font-size:3rem;font-style:italic">El presente</span></div>
+    <div class="type-row"><span class="tag">H1 · 36</span><span class="specimen-display" style="font-size:2.25rem;font-weight:400">Quietud en movimiento</span></div>
+    <div class="type-row"><span class="tag">H3 · 20</span><span class="specimen-body" style="font-size:1.25rem;font-weight:600">Inhala cuatro, sostén cuatro</span></div>
+    <div class="type-row"><span class="tag">Body · 16</span><span class="specimen-body" style="font-size:1rem;max-width:50ch;color:var(--ink-soft)">El cuerpo de texto en Hanken Grotesk mantiene una altura de línea de 1.6 para una lectura tranquila y sin tensión, sobre superficies con velo.</span></div>
+    <div class="type-row"><span class="tag">Caption · 12</span><span class="eyebrow">Etiqueta en mayúsculas · 0.18em</span></div>
+  </section>
+
+  <!-- ESPACIADO + RADIOS -->
+  <section class="wrap" id="layout">
+    <div class="sec-head">
+      <p class="eyebrow">04 · Estructura</p>
+      <h2>Espaciado y forma</h2>
+      <p>Escala de base 4px y radios generosos. La geometría es blanda: imita al cuerpo y al aliento.</p>
+    </div>
+    <div class="duo">
+      <div>
+        <p class="eyebrow" style="margin-bottom:var(--space-4)">Escala de espaciado</p>
+        <div id="spacing"></div>
+      </div>
+      <div>
+        <p class="eyebrow" style="margin-bottom:var(--space-4)">Radios</p>
+        <div class="radius-row">
+          <div class="radius-box" style="border-radius:var(--radius-sm)">14</div>
+          <div class="radius-box" style="border-radius:var(--radius-md)">22</div>
+          <div class="radius-box" style="border-radius:var(--radius-lg)">34</div>
+          <div class="radius-box" style="border-radius:var(--radius-xl)">48</div>
+          <div class="radius-box" style="border-radius:var(--radius-pill)">∞</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESPLANDOR -->
+  <section class="wrap" id="glow">
+    <div class="sec-head">
+      <p class="eyebrow">05 · Elevación</p>
+      <h2>La luz, no la sombra</h2>
+      <p>La profundidad se mide en resplandor. Halos de color reemplazan a las sombras grises.</p>
+    </div>
+    <div class="glows">
+      <div class="glow-tile g1">glow-1</div>
+      <div class="glow-tile g2">glow-2</div>
+      <div class="glow-tile g3">glow-3</div>
+      <div class="glow-tile g4" style="color:#3a6b4f">glow-orb</div>
+    </div>
+  </section>
+
+  <!-- MOVIMIENTO -->
+  <section class="wrap" id="motion">
+    <div class="sec-head">
+      <p class="eyebrow">06 · Movimiento</p>
+      <h2>El ritmo de la respiración</h2>
+      <p>Lento, en bucle, con curvas seno de inhalar y exhalar. Nada brusco.</p>
+    </div>
+    <div class="motion-demo">
+      <div class="ease-card">
+        <b>ease-breath</b><br><code>cubic-bezier(.37,0,.63,1)</code>
+        <div class="track"><div class="dot d-breath"></div></div>
+      </div>
+      <div class="ease-card">
+        <b>ease-out-soft</b><br><code>cubic-bezier(.22,1,.36,1)</code>
+        <div class="track"><div class="dot d-soft"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPONENTES -->
+  <section class="wrap" id="components">
+    <div class="sec-head">
+      <p class="eyebrow">07 · Componentes</p>
+      <h2>El sistema, vivo</h2>
+      <p>Velos de cristal sobre campos de gradiente, formas blandas y luz que respira.</p>
+    </div>
+    <div class="components">
+      <div class="panel">
+        <div class="comp-grid">
+          <div class="comp-block">
+            <h4>Botones</h4>
+            <div class="row">
+              <button class="btn btn-primary">Comenzar sesión</button>
+              <button class="btn btn-ink">Meditar</button>
+            </div>
+            <div class="row" style="margin-top:var(--space-3)">
+              <button class="btn btn-ghost">Saber más</button>
+            </div>
+          </div>
+
+          <div class="comp-block">
+            <h4>Etiquetas</h4>
+            <div class="row">
+              <span class="badge b-mint">Calma</span>
+              <span class="badge b-lav">Sueño</span>
+              <span class="badge b-rose">Enfoque</span>
+              <span class="badge b-gold">Energía</span>
+            </div>
+          </div>
+
+          <div class="comp-block">
+            <h4>Campo</h4>
+            <input class="field" type="email" placeholder="tu@correo.com">
+          </div>
+
+          <div class="comp-block">
+            <h4>Tarjeta</h4>
+            <div class="mini-card">
+              <span class="badge b-mint">7 min</span>
+              <h5>Respiración de la mañana</h5>
+              <p>Un ciclo suave para despertar el sistema nervioso con luz.</p>
+            </div>
+          </div>
+
+          <div class="comp-block">
+            <h4>Orbe de respiración</h4>
+            <div class="orb-stage">
+              <div class="orb"></div>
+              <span class="orb-label">inhala · exhala</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="orb"></div>
+    <p><strong>Aura</strong> — Sistema de Diseño · v1.0</p>
+    <p style="margin-top:6px">Derivado de la dirección visual de las imágenes de referencia.</p>
+  </footer>
+
+<script>
+  const spectrum = [
+    ['Sky','#8fcddf'],['Mint','#a6ddd5'],['Sage','#bcc4a4'],['Gold','#f3d49a'],
+    ['Peach','#fbc38c'],['Coral','#f59f93'],['Rose','#e7b2ac'],['Orchid','#c88cb6'],
+    ['Lavender','#beafc2'],['Iris','#9d7cc4'],['Indigo','#7477c3'],['Steel','#6797bc']
+  ];
+  const dark = new Set(['#9d7cc4','#7477c3','#6797bc']);
+  document.getElementById('spectrum').innerHTML = spectrum.map(([n,h])=>
+    `<div class="sw ${dark.has(h)?'dark':''}" style="background:${h}">
+       <span class="name">${n}</span><span class="hex">${h}</span></div>`).join('');
+
+  const semantic = [
+    ['Mist','#faf6f1','fondo base'],['Dawn','#fed0bf','campo durazno'],
+    ['Dusk Coral','#fb9095','acento'],['Ink','#2f2c49','texto'],
+    ['Ink soft','#6f6a89','texto 2º'],['Glow Mint','#c8f0d8','éxito / orbe'],
+    ['Glow Warm','#fff4e2','núcleo de luz'],['Line','rgba(47,44,73,.12)','bordes']
+  ];
+  document.getElementById('semantic').innerHTML = semantic.map(([n,c,u])=>
+    `<div class="chip"><div class="dot" style="background:${c}"></div>
+       <div class="meta"><b>${n}</b><span>${c}</span><span style="display:block">${u}</span></div></div>`).join('');
+
+  const spaces=[['1',4],['2',8],['3',12],['4',16],['5',24],['6',32],['7',48],['8',64],['9',96]];
+  document.getElementById('spacing').innerHTML = spaces.map(([t,px])=>
+    `<div class="scale-row"><span class="label">space-${t}</span>
+       <div class="scale-bar" style="width:${px}px"></div>
+       <span class="label">${px}px</span></div>`).join('');
+</script>
+</body>
+</html>
