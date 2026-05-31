@@ -192,13 +192,23 @@ After writing copy, output a complete JSON spec using this exact schema:
 
 #### image_prompt field:
 
-For slides that benefit from a visual (cover, proof, bridge), populate `image_prompt` with a Higgsfield-ready prompt using the Aura visual language:
+For slides that benefit from a visual (cover, proof, bridge), populate `image_prompt` with a prompt using the Aura visual language:
 
 - Pure atmosphere, no text, no UI elements, no labels
 - Aura palette (sky blue, mint, gold, peach, coral, rose, lavender, indigo pastels)
 - Glowing figure or abstract scene — no hard shadows, everything emits light
 - Subtle film grain, soft gradients, 9:16 format
 - Adapt scene to slide content — cover gets the full lotus/aura scene, proof gets an orb or radiant geometry, bridge gets a warm atmospheric landscape
+
+#### Image generation — provider fallback
+
+After outputting the JSON spec, generate each image automatically using this logic — never stop and ask, just execute:
+
+1. Check Higgsfield credits via the `balance` MCP tool
+2. **If credits > 0** → use `mcp__generate_image` with `model: nano_banana_pro`, `aspect_ratio: 9:16`, `resolution: 2k`
+3. **If credits = 0** → run `python3 scripts/generate_image.py --prompt "<image_prompt>" --output images/slide_<N>.png --force gemini` for each slide that has an `image_prompt`
+
+Create the `images/` directory if it does not exist. Report the provider used and the output path or URL for each image.
 
 ---
 
