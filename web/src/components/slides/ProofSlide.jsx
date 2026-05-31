@@ -1,8 +1,8 @@
-import { usePollinationsImage } from '../../hooks/usePollinationsImage'
+import { useSlideImage } from '../../hooks/useSlideImage'
 import { PALETTE, TYPOGRAPHY, GRADIENTS } from '../../tokens'
 
-export default function ProofSlide({ slide }) {
-  const { url: imgUrl, loading } = usePollinationsImage(slide.image_prompt)
+export default function ProofSlide({ slide, imageProvider, higgsApiKey }) {
+  const { url: imgUrl, loading } = useSlideImage(slide.image_prompt, imageProvider, higgsApiKey)
 
   return (
     <div

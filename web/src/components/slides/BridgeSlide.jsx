@@ -1,9 +1,9 @@
-import { usePollinationsImage } from '../../hooks/usePollinationsImage'
+import { useSlideImage } from '../../hooks/useSlideImage'
 import { PALETTE, TYPOGRAPHY, GRADIENTS } from '../../tokens'
 
-export default function BridgeSlide({ slide, design }) {
+export default function BridgeSlide({ slide, design, imageProvider, higgsApiKey }) {
   const gradient = design?.cover_gradient || GRADIENTS.grad_aura
-  const { url: imgUrl, loading } = usePollinationsImage(slide.image_prompt)
+  const { url: imgUrl, loading } = useSlideImage(slide.image_prompt, imageProvider, higgsApiKey)
 
   return (
     <div

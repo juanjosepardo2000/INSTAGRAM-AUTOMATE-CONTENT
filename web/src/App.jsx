@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import './App.css'
 import SlideRenderer from './components/SlideRenderer'
+import AccountsPanel from './components/AccountsPanel'
+import { useAccounts } from './hooks/useAccounts'
 
 const SAMPLE_JSON = `{
   "meta": {
     "topic": "Box Breathing",
-    "format": "educational carousel",
-    "hook": "Navy SEALs use this 2-min trick to instantly calm down"
+    "format": "TUTORIAL",
+    "hook": "Navy SEALs use this 2-minute trick to stay calm under pressure"
   },
   "design": {
     "palette": {
@@ -22,70 +24,53 @@ const SAMPLE_JSON = `{
   },
   "slides": [
     {
-      "index": 1,
-      "type": "cover",
-      "layout": "center_stack",
-      "background": "grad_aura",
+      "index": 1, "type": "cover", "layout": "center_stack", "background": "grad_aura",
       "headline_segments": ["Navy SEALs", "use this", "2-min trick"],
-      "body": null,
-      "badge": null,
-      "image_prompt": null
+      "body": null, "badge": null,
+      "image_prompt": "A glowing human silhouette seated in stillness at the center of a vast soft-gradient field, surrounded by slow-expanding rings of mint and sky-blue light, warm gold light rising from below, lavender mist dissolving at the edges, aura palette pastels, everything emits light nothing casts shadow, subtle film grain, 9:16 vertical format"
     },
     {
-      "index": 2,
-      "type": "pain",
+      "index": 2, "type": "pain",
       "headline": "Reset your mind in 2 minutes flat.",
-      "body": "Box Breathing activates your parasympathetic nervous system — the built-in calm switch used by elite performers under pressure.",
+      "body": "Box Breathing activates your body's natural calm response so stress drops and focus returns fast.",
       "image_prompt": null
     },
     {
-      "index": 3,
-      "type": "step",
-      "headline": "Inhale for 4 counts.",
-      "step_number": 1,
-      "badge": "Step 1",
-      "body": "Breathe in slowly through your nose while counting to four. Feel your chest and belly expand fully.",
+      "index": 3, "type": "step", "headline": "Inhale for 4 counts.",
+      "step_number": 1, "badge": "Step 1",
+      "body": "Breathe in slowly through your nose while counting to 4, filling your lungs completely.",
       "image_prompt": null
     },
     {
-      "index": 4,
-      "type": "step",
-      "headline": "Hold for 4 counts.",
-      "step_number": 2,
-      "badge": "Step 2",
-      "body": "Hold your breath at the top. Stay relaxed — no tension. This pause lets CO₂ levels balance.",
+      "index": 4, "type": "step", "headline": "Hold for 4 counts.",
+      "step_number": 2, "badge": "Step 2",
+      "body": "Keep the air in and hold still for 4 counts, letting your nervous system begin to slow down.",
       "image_prompt": null
     },
     {
-      "index": 5,
-      "type": "step",
-      "headline": "Exhale for 4 counts.",
-      "step_number": 3,
-      "badge": "Step 3",
-      "body": "Release the breath slowly through your mouth. Let tension leave your body with the air.",
+      "index": 5, "type": "step", "headline": "Exhale and hold 4 counts.",
+      "step_number": 3, "badge": "Step 3",
+      "body": "Breathe out fully for 4 counts, then hold empty for 4 counts before starting the next round.",
       "image_prompt": null
     },
     {
-      "index": 6,
-      "type": "proof",
+      "index": 6, "type": "proof",
       "headline": "2 minutes. Measurable calm.",
-      "body": "Studies show box breathing lowers cortisol, reduces heart rate, and improves focus within 4 rounds.",
-      "image_prompt": null
+      "body": "Studies show controlled breathing reduces cortisol levels and lowers heart rate within 2 minutes.",
+      "image_prompt": "A luminous geometric orb pulsing with soft concentric rings of mint, gold, and sky blue light, floating in a deep indigo-lavender gradient field, each ring expanding outward in slow rhythmic waves, warm peach glow at the core, no text no labels, film grain overlay, 9:16 vertical format"
     },
     {
-      "index": 7,
-      "type": "bridge",
-      "headline": "Thousands use this daily.",
-      "body": "Before presentations, exams, difficult conversations — box breathing works anywhere, anytime.",
-      "image_prompt": null
+      "index": 7, "type": "bridge",
+      "headline": "Thousands use this before high-pressure moments.",
+      "body": "Before presentations, exams, hard conversations, and interviews — Box Breathing is the reset that needs no equipment.",
+      "image_prompt": "A warm atmospheric aerial landscape at golden hour, soft rolling hills bathed in peach and coral light, a single glowing figure standing on a ridge facing an open horizon, lavender sky dissolving into mint at the top, everything glows with inner light, no shadows no text, film grain, 9:16 vertical format"
     },
     {
-      "index": 8,
-      "type": "cta",
+      "index": 8, "type": "cta",
       "headline": "Want the full guide?",
       "keyword": "CALM",
       "offer": "Free Box Breathing Guide",
-      "body": "Comment CALM below and I'll DM you the complete 7-day breathing protocol — no cost, no catch."
+      "body": "Comment CALM and get the free step-by-step Box Breathing guide delivered straight to your inbox."
     }
   ]
 }`
@@ -96,6 +81,9 @@ export default function App() {
     try { return JSON.parse(SAMPLE_JSON) } catch { return null }
   })
   const [error, setError] = useState(null)
+  const [imageProvider, setImageProvider] = useState('pollinations')
+
+  const { accounts, activeAccount, addAccount, removeAccount, selectAccount } = useAccounts()
 
   function handleRender() {
     try {
@@ -108,32 +96,78 @@ export default function App() {
   }
 
   function handleKeyDown(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      handleRender()
-    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handleRender()
   }
 
   const meta = spec?.meta || {}
   const slides = spec?.slides || []
   const design = spec?.design || {}
 
+  const effectiveProvider = imageProvider === 'higgsfield' && !activeAccount
+    ? 'pollinations'
+    : imageProvider
+
   return (
     <div className="app">
       {/* ── Left Panel ── */}
       <div className="panel-left">
-        <h1>Carousel Preview</h1>
+        <div className="panel-left-header">
+          <h1>Carousel Preview</h1>
+          <AccountsPanel
+            accounts={accounts}
+            activeAccount={activeAccount}
+            onAdd={addAccount}
+            onRemove={removeAccount}
+            onSelect={selectAccount}
+          />
+        </div>
+
         <p className="subtitle">
-          Paste a carousel JSON spec below, then click Render (or press Ctrl+Enter) to preview all slides.
+          Paste the JSON spec from the <code>/carousel</code> skill, then press Render.
         </p>
+
         <textarea
           className="json-textarea"
           value={jsonText}
           onChange={e => setJsonText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder='Paste carousel JSON spec here…'
+          placeholder="Paste carousel JSON spec here…"
           spellCheck={false}
         />
+
         {error && <div className="error-msg">{error}</div>}
+
+        <div className="provider-row">
+          <span className="provider-label">Image provider:</span>
+          <label className={`provider-opt ${effectiveProvider === 'pollinations' ? 'provider-opt--active' : ''}`}>
+            <input
+              type="radio"
+              name="provider"
+              value="pollinations"
+              checked={imageProvider === 'pollinations'}
+              onChange={() => setImageProvider('pollinations')}
+            />
+            Pollinations (free)
+          </label>
+          <label className={`provider-opt ${imageProvider === 'higgsfield' ? 'provider-opt--active' : ''} ${!activeAccount ? 'provider-opt--disabled' : ''}`}>
+            <input
+              type="radio"
+              name="provider"
+              value="higgsfield"
+              checked={imageProvider === 'higgsfield'}
+              onChange={() => setImageProvider('higgsfield')}
+              disabled={!activeAccount}
+            />
+            Higgsfield {!activeAccount && '(no account)'}
+          </label>
+        </div>
+
+        {imageProvider === 'higgsfield' && !activeAccount && (
+          <div className="provider-warning">
+            Add a Higgsfield account above to use this provider.
+          </div>
+        )}
+
         <button className="btn-render" onClick={handleRender}>
           Render Slides
         </button>
@@ -165,6 +199,8 @@ export default function App() {
               slide={slide}
               index={i}
               design={design}
+              imageProvider={effectiveProvider}
+              higgsApiKey={activeAccount?.apiKey || null}
             />
           ))}
         </div>

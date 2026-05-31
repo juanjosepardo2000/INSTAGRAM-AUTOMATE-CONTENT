@@ -1,28 +1,20 @@
-import { usePollinationsImage } from '../../hooks/usePollinationsImage'
+import { useSlideImage } from '../../hooks/useSlideImage'
 import { GRADIENTS, TYPOGRAPHY, PALETTE } from '../../tokens'
 
-export default function CoverSlide({ slide, design }) {
+export default function CoverSlide({ slide, design, imageProvider, higgsApiKey }) {
   const gradient = design?.cover_gradient || GRADIENTS.grad_aura
-  const { url: imgUrl, loading } = usePollinationsImage(slide.image_prompt)
-
+  const { url: imgUrl, loading } = useSlideImage(slide.image_prompt, imageProvider, higgsApiKey)
   const segments = slide.headline_segments || (slide.headline ? [slide.headline] : [])
 
   return (
-    <div
-      className="slide-inner"
-      style={{ background: gradient, justifyContent: 'center', alignItems: 'center' }}
-    >
+    <div className="slide-inner" style={{ background: gradient, justifyContent: 'center', alignItems: 'center' }}>
       {slide.image_prompt && (
         <div
           className="slide-bg-image"
-          style={{
-            backgroundImage: imgUrl ? `url(${imgUrl})` : 'none',
-            opacity: imgUrl ? 0.4 : 0,
-          }}
+          style={{ backgroundImage: imgUrl ? `url(${imgUrl})` : 'none', opacity: imgUrl ? 0.4 : 0 }}
         />
       )}
       {loading && <div className="slide-skeleton-overlay" />}
-
       <div className="cover-text-stack">
         {segments.map((seg, i) => (
           <span

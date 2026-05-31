@@ -8,27 +8,21 @@ import BridgeSlide from './slides/BridgeSlide'
 import CtaSlide from './slides/CtaSlide'
 import { SLIDE_WIDTH, SLIDE_HEIGHT, BORDER_RADIUS } from '../tokens'
 
-function SlideContent({ slide, design }) {
+function SlideContent({ slide, design, imageProvider, higgsApiKey }) {
+  const imageProps = { imageProvider, higgsApiKey }
   switch (slide.type) {
-    case 'cover':
-      return <CoverSlide slide={slide} design={design} />
-    case 'pain':
-      return <PainSlide slide={slide} design={design} />
+    case 'cover':   return <CoverSlide slide={slide} design={design} {...imageProps} />
+    case 'pain':    return <PainSlide slide={slide} design={design} />
     case 'step':
-    case 'list_item':
-      return <StepSlide slide={slide} design={design} />
-    case 'proof':
-      return <ProofSlide slide={slide} design={design} />
-    case 'bridge':
-      return <BridgeSlide slide={slide} design={design} />
-    case 'cta':
-      return <CtaSlide slide={slide} design={design} />
-    default:
-      return <PainSlide slide={slide} design={design} />
+    case 'list_item': return <StepSlide slide={slide} design={design} />
+    case 'proof':   return <ProofSlide slide={slide} design={design} {...imageProps} />
+    case 'bridge':  return <BridgeSlide slide={slide} design={design} {...imageProps} />
+    case 'cta':     return <CtaSlide slide={slide} design={design} />
+    default:        return <PainSlide slide={slide} design={design} />
   }
 }
 
-export default function SlideRenderer({ slide, index, design }) {
+export default function SlideRenderer({ slide, index, design, imageProvider, higgsApiKey }) {
   const slideRef = useRef(null)
 
   async function handleDownload() {
@@ -64,7 +58,12 @@ export default function SlideRenderer({ slide, index, design }) {
           position: 'relative',
         }}
       >
-        <SlideContent slide={slide} design={design} />
+        <SlideContent
+          slide={slide}
+          design={design}
+          imageProvider={imageProvider}
+          higgsApiKey={higgsApiKey}
+        />
       </div>
       <button className="btn-download" onClick={handleDownload}>
         Download PNG
