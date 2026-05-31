@@ -1,0 +1,237 @@
+/* ── Layout ──────────────────────────────────────────── */
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Left Panel ──────────────────────────────────────── */
+.panel-left {
+  width: 340px;
+  min-width: 280px;
+  background: #fff;
+  border-right: 1px solid #e8e3dc;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 24px;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.panel-left h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2f2c49;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.panel-left p.subtitle {
+  font-size: 13px;
+  color: #6f6a89;
+  line-height: 1.5;
+}
+
+.json-textarea {
+  flex: 1;
+  min-height: 240px;
+  font-family: 'Courier New', monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #2f2c49;
+  background: #faf6f1;
+  border: 1.5px solid #e0dbd3;
+  border-radius: 12px;
+  padding: 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.json-textarea:focus {
+  border-color: #9d7cc4;
+}
+
+.btn-render {
+  background: #9d7cc4;
+  color: #fff;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+
+.btn-render:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-render:active { transform: translateY(0); opacity: 1; }
+
+.error-msg {
+  font-size: 12px;
+  color: #e05c5c;
+  background: #fff0f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+
+/* ── Right Panel ─────────────────────────────────────── */
+.panel-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.meta-bar {
+  padding: 20px 32px 16px;
+  border-bottom: 1px solid #e8e3dc;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-bar .meta-topic {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2f2c49;
+  letter-spacing: -0.01em;
+}
+
+.meta-bar .meta-detail {
+  font-size: 13px;
+  color: #6f6a89;
+}
+
+.meta-bar .meta-hook {
+  font-size: 13px;
+  color: #9d7cc4;
+  font-style: italic;
+}
+
+.slides-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 32px;
+  scroll-snap-type: x mandatory;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 12px;
+  color: #b0accc;
+}
+
+.empty-state svg {
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 15px;
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+}
+
+/* ── Slide Wrapper ───────────────────────────────────── */
+.slide-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+.slide-index-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9d7cc4;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.slide-frame {
+  box-shadow: 0 8px 40px rgba(47, 44, 73, 0.12), 0 2px 8px rgba(47, 44, 73, 0.06);
+}
+
+/* ── Slide Inner (base for all slide types) ──────────── */
+.slide-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.slide-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.4s;
+}
+
+.slide-skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.15) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  z-index: 2;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.cover-text-stack {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 32px;
+}
+
+/* ── Download Button ─────────────────────────────────── */
+.btn-download {
+  background: transparent;
+  border: 1.5px solid #9d7cc4;
+  color: #9d7cc4;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 7px 18px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  letter-spacing: 0.03em;
+}
+
+.btn-download:hover {
+  background: #9d7cc4;
+  color: #fff;
+}
+
+/* ── Scrollbar styling ───────────────────────────────── */
+.slides-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+.slides-scroll::-webkit-scrollbar-track { background: transparent; }
+.slides-scroll::-webkit-scrollbar-thumb { background: #d4cfe8; border-radius: 99px; }
