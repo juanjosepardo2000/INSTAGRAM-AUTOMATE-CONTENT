@@ -3,3 +3,4 @@ web/node_modules/
 web/web/node_modules/
 web/dist/
 web/web/dist/
+.claude/worktrees/
